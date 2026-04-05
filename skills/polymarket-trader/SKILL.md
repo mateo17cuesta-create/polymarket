@@ -1,6 +1,6 @@
 # Polymarket Arbitrage Bot
 
-description: Risk-free arbitrage — find mathematical pricing violations between related markets, execute both legs (buy YES underpriced + buy NO overpriced) to lock in profit in ALL scenarios. Only trades markets resolving within 24 hours so capital is free every day.
+description: Risk-free arbitrage — find mathematical pricing violations between related markets, execute both legs (buy YES underpriced + buy NO overpriced) to lock in guaranteed profit in ALL scenarios. Resolution date is irrelevant — profit is locked at execution.
 
 ---
 
@@ -10,7 +10,7 @@ When two related markets violate mathematical logic, execute both legs simultane
 1. **Buy YES** on the underpriced market
 2. **Buy NO** on the overpriced market
 
-Profit is locked in regardless of outcome. Only trade markets that resolve within 24 hours.
+Profit is locked in at the moment of execution. It does not matter when the market resolves.
 
 **Example:**
 ```
@@ -58,7 +58,6 @@ Extract:
 - `outcomePrices[1]` = NO price
 - `clobTokenIds[0]` = YES token ID
 - `clobTokenIds[1]` = NO token ID
-- `endDate` = resolution date
 - `orderMinSize` (must be ≤ 5)
 - `acceptingOrders` (must be true)
 - `groupItemTitle`
@@ -90,10 +89,8 @@ min_profit = worst_case - 10
 
 ### Filter and rank:
 - Discard if min_profit ≤ $0.50
-- **Discard any opportunity resolving more than 24 hours from now** — capital must be fully free every day
-- Score = min_profit / hours_until_resolution
-- **Pick the single highest-scoring violation**
-- Tiebreak: earliest endDate wins
+- **Pick the violation with the highest min_profit** — resolution date is irrelevant, profit locks in at execution
+- Tiebreak: largest violation gap wins
 
 ---
 
@@ -120,27 +117,27 @@ If Leg 1 fails, do NOT place Leg 2. If Leg 2 fails after Leg 1 fills, report it 
 ```
 ## Polymarket Arbitrage Bot — [DATE]
 
-### Balance: $X.XX | Position: N | Spent: $N.NN
+### Balance: $X.XX | Position executed: Y/N | Spent: $N.NN
 
 ### EXECUTED
-| Event | Leg 1 BUY YES | Price | Leg 2 BUY NO | Price | Resolves | Min profit | Max profit |
-|-------|--------------|-------|--------------|-------|----------|------------|------------|
+| Event | Leg 1 BUY YES | Price | Leg 2 BUY NO | Price | Min profit | Max profit |
+|-------|--------------|-------|--------------|-------|------------|------------|
 
 ### ALL VIOLATIONS FOUND
-| Event | Gap | Min profit | Resolves | Score | Status |
-|-------|-----|------------|----------|-------|--------|
+| Event | Type | Gap | Min profit | Status |
+|-------|------|-----|------------|--------|
 
 ### SUMMARY
-Events scanned: N | With 2+ markets: N | Violations: N | Within 24h + profitable: N | Executed: 1
+Events scanned: N | With 2+ markets: N | Violations: N | Profitable: N | Executed: 1
 ```
 
 ---
 
 ## Rules
-1. Always execute BOTH legs — one leg alone is a directional bet
+1. Always execute BOTH legs — one leg alone is a directional bet, not arbitrage
 2. Min guaranteed profit > $0.50 after fees
-3. **Max resolution: 24 hours from now** — capital must be free every day
-4. Pick the single best score (profit / hours until resolution)
+3. No restriction on resolution date — profit is locked in at execution
+4. Pick the single violation with highest guaranteed profit
 5. Skip if: acceptingOrders=false, price >0.95 or <0.05, orderMinSize>5
 6. Skip if resolution criteria differ between the two markets
 7. If one leg fails, do not place the other
