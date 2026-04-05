@@ -1,6 +1,6 @@
 # Polymarket Arbitrage Bot
 
-description: Risk-free arbitrage — find mathematical pricing violations between related markets, execute both legs (buy YES underpriced + buy NO overpriced) to lock in profit in ALL scenarios. Prioritizes opportunities that resolve soonest.
+description: Risk-free arbitrage — find mathematical pricing violations between related markets, execute both legs (buy YES underpriced + buy NO overpriced) to lock in profit in ALL scenarios. Only trades markets resolving within 24 hours so capital is free every day.
 
 ---
 
@@ -10,7 +10,7 @@ When two related markets violate mathematical logic, execute both legs simultane
 1. **Buy YES** on the underpriced market
 2. **Buy NO** on the overpriced market
 
-Profit is locked in regardless of outcome. Prioritize opportunities resolving within 30 days.
+Profit is locked in regardless of outcome. Only trade markets that resolve within 24 hours.
 
 **Example:**
 ```
@@ -90,8 +90,8 @@ min_profit = worst_case - 10
 
 ### Filter and rank:
 - Discard if min_profit ≤ $0.50
-- **Discard if endDate > 30 days from today** — capital tied up too long
-- Score = min_profit / days_until_resolution
+- **Discard any opportunity resolving more than 24 hours from now** — capital must be fully free every day
+- Score = min_profit / hours_until_resolution
 - **Pick the single highest-scoring violation**
 - Tiebreak: earliest endDate wins
 
@@ -131,16 +131,16 @@ If Leg 1 fails, do NOT place Leg 2. If Leg 2 fails after Leg 1 fills, report it 
 |-------|-----|------------|----------|-------|--------|
 
 ### SUMMARY
-Events scanned: N | With 2+ markets: N | Violations: N | Profitable+<30d: N | Executed: 1
+Events scanned: N | With 2+ markets: N | Violations: N | Within 24h + profitable: N | Executed: 1
 ```
 
 ---
 
 ## Rules
 1. Always execute BOTH legs — one leg alone is a directional bet
-2. Min guaranteed profit > $0.50
-3. Max resolution: 30 days from today
-4. Pick the single best score (profit/day)
+2. Min guaranteed profit > $0.50 after fees
+3. **Max resolution: 24 hours from now** — capital must be free every day
+4. Pick the single best score (profit / hours until resolution)
 5. Skip if: acceptingOrders=false, price >0.95 or <0.05, orderMinSize>5
 6. Skip if resolution criteria differ between the two markets
 7. If one leg fails, do not place the other
