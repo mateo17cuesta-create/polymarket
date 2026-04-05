@@ -1,0 +1,8 @@
+{
+  "name": "polymarket-bot",
+  "version": "1.0.0",
+  "description": "Autonomous Polymarket trading bot. Scans prediction markets for pricing inefficiencies using real-time news from Composio, then executes trades on information not yet priced in.",
+  "author": {
+    "name": "Javier"
+  }
+}
